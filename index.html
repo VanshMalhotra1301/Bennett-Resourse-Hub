@@ -3,45 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bennett University Resource Hub | 2025</title>
+    <title>Bennett University Resource Hub | Premium Access</title>
     
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     
-    <!-- Icons (Phosphor Icons) -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Custom Config for Tailwind -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
                     },
                     colors: {
-                        bu: {
-                            blue: '#0056D2', // Approximate BU Blue
-                            gold: '#FFC72C', // Approximate BU Gold
-                            dark: '#0f172a',
-                            card: '#1e293b'
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out forwards',
-                        'slide-up': 'slideUp 0.5s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        luxury: {
+                            base: '#050505', 
+                            surface: '#0f172a',
+                            gold: '#fbbf24',
+                            accent: '#6366f1',
                         }
                     }
                 }
@@ -50,416 +36,475 @@
     </script>
 
     <style>
-        /* Glassmorphism utilities */
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
+        /* Base Setup */
+        body {
+            background-color: #050505; /* Pitch black for contrast */
+            overflow-x: hidden;
+        }
+
+        /* The Live Background Canvas - Made Brighter */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 1; /* Full visibility */
+            pointer-events: none;
+        }
+
+        /* Premium Card Styling - Clean Glass */
+        .premium-card {
+            background: rgba(20, 20, 20, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Mouse Spotlight Effect */
+        .premium-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y), 
+                rgba(255, 255, 255, 0.6), 
+                transparent 40%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .premium-card:hover::before {
+            opacity: 1;
         }
         
-        .glass-header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
+        /* Inner Glow */
+        .card-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(
+                500px circle at var(--mouse-x) var(--mouse-y), 
+                rgba(99, 102, 241, 0.15), 
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .premium-card:hover .card-glow {
+            opacity: 1;
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; 
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
-<body class="bg-bu-dark text-slate-200 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+<body class="text-slate-300 antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- NAVIGATION -->
-    <nav class="fixed w-full z-50 glass-header border-b border-slate-700/50">
+    <canvas id="canvas-container"></canvas>
+
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-4">
-                    <!-- UNIVERSITY LOGO PLACEHOLDER -->
-                    <!-- INSTRUCTION: Replace src="..." with your actual logo file path (e.g., assets/logo.png) -->
-                    <div class="h-12 w-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-lg border-2 border-indigo-500">
-                        <!-- Placeholder Icon if no image -->
-                        <i class="ph-bold ph-graduation-cap text-bu-blue text-2xl"> </i> 
-                        
-                        <img src="logo.png" alt="BU Logo" class="h-full w-full object-contain">
+                    <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center">
+                         <i class="ph-fill ph-graduation-cap text-black text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-white tracking-tight">BU Resource Hub</h1>
-                        <p class="text-xs text-slate-400 font-medium tracking-widest uppercase">Paper Collection</p>
+                        <h1 class="text-lg font-display font-bold text-white tracking-tight">BU Resource Hub</h1>
                     </div>
                 </div>
                 <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#sem1" class="hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Sem 1</a>
-                        <a href="#sem2" class="hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Sem 2</a>
-                        <a href="#sem3" class="hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Sem 3</a>
+                    <div class="flex items-center space-x-1">
+                        <a href="#sem1" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 1</a>
+                        <a href="#sem2" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 2</a>
+                        <a href="#sem3" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 3</a>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <div class="relative pt-32 pb-12 sm:pt-40 sm:pb-16 overflow-hidden">
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10 animate-fade-in">
-            <div class="inline-flex items-center px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-8">
-                <span class="flex h-2 w-2 rounded-full bg-indigo-400 mr-2 animate-pulse"></span>
-                Updated for 2025 Session
-            </div>
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight mb-6">
-                Ace Your Exams <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
-                    One Paper at a Time
-                </span>
+    <div class="relative pt-48 pb-24 overflow-hidden">
+        <div class="relative max-w-4xl mx-auto px-4 text-center z-10 hero-content">
+            
+            <h1 class="text-4xl sm:text-6xl font-display font-bold text-white tracking-tight mb-6 leading-tight">
+                The Hub of all PYQs and <br> Resources for Students.
             </h1>
-            <p class="mt-4 text-xl text-slate-400 max-w-2xl mx-auto mb-10">
-                The unofficial archive for Bennett University previous year question papers. Curated for engineers, by engineers.
+            
+            <p class="text-base text-slate-400 max-w-xl mx-auto mb-10 font-light">
+                A simple, curated archive for Bennett University. No clutter, just engineering resources.
             </p>
             
-            <!-- SEARCH BAR -->
-            <div class="max-w-xl mx-auto relative group">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <i class="ph ph-magnifying-glass text-slate-400 text-xl group-focus-within:text-indigo-400 transition-colors"></i>
+            <div class="max-w-lg mx-auto relative group">
+                <div class="relative bg-zinc-900/80 border border-zinc-700 rounded-full flex items-center hover:border-indigo-500 transition-colors duration-300">
+                    <div class="pl-6 text-slate-400">
+                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
+                    </div>
+                    <input type="text" id="searchInput" onkeyup="filterSubjects()" 
+                        class="w-full bg-transparent border-0 py-4 px-4 text-white placeholder-zinc-500 focus:ring-0 text-base font-light" 
+                        placeholder="Search for subjects...">
                 </div>
-                <input type="text" id="searchInput" onkeyup="filterSubjects()" 
-                    class="block w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-lg backdrop-blur-sm" 
-                    placeholder="Search for subjects (e.g., Python, Calculus)...">
             </div>
         </div>
-        
-        <!-- Decorative background blurs -->
-        <div class="absolute top-0 left-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-        <div class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-24">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 space-y-24">
 
-        <!-- SEMESTER 1 -->
-        <section id="sem1" class="semester-section animate-slide-up" style="animation-delay: 0.1s;">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">1</div>
-                <h2 class="text-3xl font-bold text-white">Semester 1</h2>
-                <div class="h-px bg-slate-800 flex-grow ml-4"></div>
+        <section id="sem1" class="semester-section">
+            <div class="mb-8">
+                <h2 class="text-3xl font-display font-bold text-white">Semester 01</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
-                <!-- CARD: Engineering Calculus -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-function text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                <i class="ph-fill ph-function text-xl"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-slate-500 border border-zinc-800 px-2 py-1 rounded tracking-widest">MAT101</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-1 rounded">MAT101</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Engineering Calculus</h3>
-                    <p class="text-sm text-slate-400 mb-6">Limits, derivatives, integrals, and their applications in engineering.</p>
-                    
-                    <div class="space-y-3">
-                        <!-- DOWNLOAD LINK 1 -->
-                        <!-- INSTRUCTION: Add your drive/pdf link in href below -->
-                        <a href="https://drive.google.com/file/d/1G7kTYB2ltfbacOX7oZ2SONjCZHeRx8Ic/view?usp=drivesdk" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Engineering Calculus</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Limits, derivatives, integrals, and their applications in engineering.</p>
                         
-                        <!-- DOWNLOAD LINK 2 -->
-                        <a href="https://drive.google.com/file/d/1DzjJG5-6xhz7j9cLQQnK8rUSUXU1N_7q/view?usp=drivesdk" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1G7kTYB2ltfbacOX7oZ2SONjCZHeRx8Ic/view?usp=drivesdk" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all group/btn">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-blue-400"></i>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1DzjJG5-6xhz7j9cLQQnK8rUSUXU1N_7q/view?usp=drivesdk" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all group/btn">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-blue-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: Electronics -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-yellow-500/10 rounded-lg text-yellow-400 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-lightning text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-yellow-400">
+                                <i class="ph-fill ph-lightning text-xl"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-slate-500 border border-zinc-800 px-2 py-1 rounded tracking-widest">ECE101</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-1 rounded">ECE101</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Electronics</h3>
-                    <p class="text-sm text-slate-400 mb-6">Basic circuit theory, diodes, transistors and logic gates.</p>
-                    <div class="space-y-3">
-                        <a href="https://drive.google.com/file/d/1Ml3dKyHPQBlWB3jP4qx6EGES0qBx-IyF/view?usp=drivesdk" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
-
-                        <a href="https://drive.google.com/file/d/1CM6ttww-zcjEqPNeqMOOFF3Bj7V7XYDt/view?usp=drivesdk" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Electronics</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Basic circuit theory, diodes, transistors and logic gates.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1Ml3dKyHPQBlWB3jP4qx6EGES0qBx-IyF/view?usp=drivesdk" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-yellow-400"></i>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1CM6ttww-zcjEqPNeqMOOFF3Bj7V7XYDt/view?usp=drivesdk" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-yellow-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: Mechanics & Electromagnetism -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-red-500/10 rounded-lg text-red-400 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-magnet text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-red-500/20 flex items-center justify-center text-red-400">
+                                <i class="ph-fill ph-magnet text-xl"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-slate-500 border border-zinc-800 px-2 py-1 rounded tracking-widest">PHY101</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-1 rounded">PHY101</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Mechanics & Electromagnetism</h3>
-                    <p class="text-sm text-slate-400 mb-6">Newtonian mechanics, Maxwell's equations and wave optics.</p>
-                    <div class="space-y-3">
-                        <a href="https://drive.google.com/file/d/1MgC1o9PMD7c1GwXKlLSHMdzEWkgmALrg/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
-                        <a href="https://drive.google.com/file/d/1buhBRDH5djgNx3tQII4sqC9I4GnopLUq/view?usp=drivesdk" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Mechanics & Electromagnetism</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Newtonian mechanics, Maxwell's equations and wave optics.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1MgC1o9PMD7c1GwXKlLSHMdzEWkgmALrg/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-red-400"></i>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1buhBRDH5djgNx3tQII4sqC9I4GnopLUq/view?usp=drivesdk" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-red-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: Computational Thinking (Python) -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-green-500/10 rounded-lg text-green-400 group-hover:bg-green-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-code text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                                <i class="ph-fill ph-code text-xl"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-slate-500 border border-zinc-800 px-2 py-1 rounded tracking-widest">CSE101</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-1 rounded">CSE101</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Computational Thinking (Python)</h3>
-                    <p class="text-sm text-slate-400 mb-6">Introduction to programming, algorithms, and Python syntax.</p>
-                    <div class="space-y-3">
-                        <a href="https://drive.google.com/file/d/1Pke5DVHy7qIniFMi55JAy6AmK8eWEU4E/view?usp=drive_link" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
-                        <a href="" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700 group/btn">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400 group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- SEMESTER 2 -->
-        <section id="sem2" class="semester-section animate-slide-up" style="animation-delay: 0.2s;">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">2</div>
-                <h2 class="text-3xl font-bold text-white">Semester 2</h2>
-                <div class="h-px bg-slate-800 flex-grow ml-4"></div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <!-- CARD: Linear Algebra & ODE -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-matrix-logo text-2xl"></i>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Computational Thinking</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Introduction to programming, algorithms, and Python syntax.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1Pke5DVHy7qIniFMi55JAy6AmK8eWEU4E/view?usp=drive_link" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-green-400"></i>
+                            </a>
+                            <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-green-400"></i>
+                            </a>
                         </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Linear Algebra & ODE</h3>
-                    <p class="text-sm text-slate-400 mb-6">Matrices, vector spaces, and differential equations.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-
-                        <a href="https://drive.google.com/file/d/1CmXBWHDVf-Op_GciNYj25-azKBALmszM/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- CARD: Java -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-orange-500/10 rounded-lg text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-coffee text-2xl"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Object Oriented Programming (Java)</h3>
-                    <p class="text-sm text-slate-400 mb-6">OOP concepts, classes, inheritance, and Java frameworks.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- CARD: Discrete Mathematics -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-teal-500/10 rounded-lg text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-sigma text-2xl"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Discrete Mathematics</h3>
-                    <p class="text-sm text-slate-400 mb-6">Set theory, logic, graph theory, and combinatorics.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- CARD: Digital Design -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-pink-500/10 rounded-lg text-pink-400 group-hover:bg-pink-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-circuitry text-2xl"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Digital Design</h3>
-                    <p class="text-sm text-slate-400 mb-6">Boolean algebra, logic gates, flip-flops and sequential circuits.</p>
-                    <div class="space-y-3">
-                        <a href="https://drive.google.com/file/d/1vjMd4MCW-zTtIYiHhhWVeyhMEd6Yvj-T/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="https://drive.google.com/file/d/1DKzexsBewTV76jxaXU37a9OuSk8idAAz/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- CARD: Environment -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-green-600/10 rounded-lg text-green-500 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-plant text-2xl"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Environment</h3>
-                    <p class="text-sm text-slate-400 mb-6">Ecology, biodiversity, and environmental sustainability studies.</p>
-                    <div class="space-y-3">
-
-                        <a href="https://drive.google.com/file/d/1UzcSvKVfFLgzh5JMG4H1oVvKV3aCkoGd/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- SEMESTER 3 -->
-        <section id="sem3" class="semester-section animate-slide-up" style="animation-delay: 0.3s;">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">3</div>
-                <h2 class="text-3xl font-bold text-white">Semester 3</h2>
-                <div class="h-px bg-slate-800 flex-grow ml-4"></div>
+        <section id="sem2" class="semester-section">
+             <div class="mb-8">
+                <h2 class="text-3xl font-display font-bold text-white">Semester 02</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
-                <!-- CARD: IMS -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-rose-500/10 rounded-lg text-rose-400 group-hover:bg-rose-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-users-three text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
+                                <i class="ph-fill ph-matrix-logo text-xl"></i>
+                            </div>
                         </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">IMS</h3>
-                    <p class="text-sm text-slate-400 mb-6">Information Management System.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Linear Algebra & ODE</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Matrices, vector spaces, and differential equations.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-purple-400"></i>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1CmXBWHDVf-Op_GciNYj25-azKBALmszM/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-purple-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: Data Structures (C++) -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-cyan-500/10 rounded-lg text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-tree-structure text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                                <i class="ph-fill ph-coffee text-xl"></i>
+                            </div>
                         </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Data Structures (C++)</h3>
-                    <p class="text-sm text-slate-400 mb-6">Arrays, Linked Lists, Trees, Graphs, and efficient algorithms.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">OOP (Java)</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">OOP concepts, classes, inheritance, and Java frameworks.</p>
+                        <div class="space-y-2 mt-auto">
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-orange-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-orange-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: SML -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-violet-500/10 rounded-lg text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-brain text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-400">
+                                <i class="ph-fill ph-sigma text-xl"></i>
+                            </div>
                         </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">SML (Machine Learning)</h3>
-                    <p class="text-sm text-slate-400 mb-6">Statistical Machine Learning concepts and models.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Discrete Mathematics</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Set theory, logic, graph theory, and combinatorics.</p>
+                        <div class="space-y-2 mt-auto">
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-teal-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-teal-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CARD: Probability & Statistics -->
-                <div class="subject-card glass rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                            <i class="ph-fill ph-chart-bar text-2xl"></i>
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-400">
+                                <i class="ph-fill ph-circuitry text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Digital Design</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Boolean algebra, logic gates, flip-flops and sequential circuits.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1vjMd4MCW-zTtIYiHhhWVeyhMEd6Yvj-T/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-pink-400"></i>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1DKzexsBewTV76jxaXU37a9OuSk8idAAz/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-pink-400"></i>
+                            </a>
                         </div>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2 subject-name">Probability & Statistics</h3>
-                    <p class="text-sm text-slate-400 mb-6">Data analysis, distributions, hypothesis testing, and regression.</p>
-                    <div class="space-y-3">
-                        <a href="https://drive.google.com/file/d/1WDe8cIwQRBrPo1jwi8xtVNUtmWvENg6C/view?usp=sharing" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Midsem 2025</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
-                        <a href="#" class="flex items-center justify-between w-full px-4 py-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors border border-slate-700">
-                            <span class="text-sm font-medium text-slate-300">Endsem 2024</span>
-                            <i class="ph-bold ph-download-simple text-indigo-400"></i>
-                        </a>
+                </div>
+
+                 <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <i class="ph-fill ph-plant text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Environment</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Ecology, biodiversity, and environmental sustainability studies.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1UzcSvKVfFLgzh5JMG4H1oVvKV3aCkoGd/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-emerald-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="sem3" class="semester-section">
+             <div class="mb-8">
+                <h2 class="text-3xl font-display font-bold text-white">Semester 03</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-rose-500/20 flex items-center justify-center text-rose-400">
+                                <i class="ph-fill ph-users-three text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">IMS</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Information Management System.</p>
+                        <div class="space-y-2 mt-auto">
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-rose-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-rose-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                <i class="ph-fill ph-tree-structure text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Data Structures (C++)</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Arrays, Linked Lists, Trees, Graphs, and efficient algorithms.</p>
+                        <div class="space-y-2 mt-auto">
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-cyan-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-cyan-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
+                                <i class="ph-fill ph-brain text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">SML (Machine Learning)</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Statistical Machine Learning concepts and models.</p>
+                        <div class="space-y-2 mt-auto">
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-violet-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-violet-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card rounded-2xl p-1 subject-card group">
+                    <div class="card-glow"></div>
+                    <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                                <i class="ph-fill ph-chart-bar text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Probability & Statistics</h3>
+                        <p class="text-sm text-slate-400 mb-8 flex-grow">Data analysis, distributions, hypothesis testing, and regression.</p>
+                        <div class="space-y-2 mt-auto">
+                            <a href="https://drive.google.com/file/d/1WDe8cIwQRBrPo1jwi8xtVNUtmWvENg6C/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all">
+                                <span class="text-xs font-medium text-slate-300">Midsem 2025</span>
+                                <i class="ph-bold ph-download-simple text-amber-400"></i>
+                            </a>
+                             <a href="#" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                <span class="text-xs font-medium text-slate-300">Endsem 2024</span>
+                                <i class="ph-bold ph-download-simple text-amber-400"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -468,58 +513,151 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="border-t border-slate-800 bg-slate-900/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="md:flex md:items-center md:justify-between">
-                <div class="flex justify-center md:justify-start space-x-6 md:order-2">
-                    <a href="#" class="text-slate-400 hover:text-white">
-                        <span class="sr-only">GitHub</span>
+    <footer class="border-t border-zinc-800 bg-black py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <h2 class="text-xl font-display font-bold text-white">BU Resource Hub</h2>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">
                         <i class="ph-fill ph-github-logo text-2xl"></i>
                     </a>
-                    <a href="#" class="text-slate-400 hover:text-white">
-                        <span class="sr-only">LinkedIn</span>
+                    <a href= "www.linkedin.com/in/vanshmalhotra1301" class="text-zinc-500 hover:text-white transition-colors">
                         <i class="ph-fill ph-linkedin-logo text-2xl"></i>
                     </a>
                 </div>
-                <div class="mt-8 md:mt-0 md:order-1 text-center md:text-left">
-                    <p class="text-base text-slate-400">
-                        &copy; 2025 Bennett University Resource Hub. All rights reserved.
-                    </p>
-                    <p class="mt-2 text-sm text-indigo-400 font-medium">
-                        Designed & Built by Vansh Malhotra
-                    </p>
-                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-zinc-900 text-center text-sm text-zinc-600">
+                <p>&copy; 2025 Bennett University Resource Hub. Designed by Vansh Malhotra.</p>
             </div>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Simple Search Filter Function
+        // 1. SEARCH FILTER
         function filterSubjects() {
-            // Get the user input
             let input = document.getElementById('searchInput');
             let filter = input.value.toUpperCase();
-            
-            // Get all subject cards
             let cards = document.getElementsByClassName('subject-card');
-
-            // Loop through all cards
             for (let i = 0; i < cards.length; i++) {
-                // Find the h3 title inside the card
                 let h3 = cards[i].getElementsByClassName('subject-name')[0];
                 let txtValue = h3.textContent || h3.innerText;
-                
-                // If text matches, show, else hide
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     cards[i].style.display = "";
-                    cards[i].parentElement.style.display = ""; // Ensure grid doesn't break
                 } else {
                     cards[i].style.display = "none";
                 }
             }
         }
+
+        // 2. CARD SPOTLIGHT EFFECT (Mouse Tracking)
+        document.querySelectorAll('.premium-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // 3. GSAP ANIMATIONS
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Hero Fade In
+        gsap.from(".hero-content > *", {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+
+        // Semester Sections Slide Up
+        gsap.utils.toArray('.semester-section').forEach((section) => {
+            gsap.from(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 90%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 40,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        });
+
+        // 4. LIVE CANVAS BACKGROUND (Brighter & More Visible)
+        const canvas = document.getElementById('canvas-container');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1; // Slightly larger particles
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                // Brighter Particle Color (Cyan/Indigo mix)
+                ctx.fillStyle = 'rgba(129, 140, 248, 0.9)'; 
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 70; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                // Connect particles
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 160) {
+                        // Significantly brighter connecting lines
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${0.3 - distance/1500})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        initParticles();
+        animate();
     </script>
 </body>
 </html>
