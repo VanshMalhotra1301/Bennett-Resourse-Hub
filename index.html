@@ -23,12 +23,13 @@
                         display: ['Space Grotesk', 'sans-serif'],
                     },
                     colors: {
-                        luxury: {
-                            base: '#050505', 
-                            surface: '#0f172a',
-                            gold: '#fbbf24',
-                            accent: '#6366f1',
+                        brand: {
+                            primary: '#6366f1', // Indigo for Skills Seekers
+                            secondary: '#a855f7', // Purple
                         }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                     }
                 }
             }
@@ -38,11 +39,11 @@
     <style>
         /* Base Setup */
         body {
-            background-color: #050505; /* Pitch black for contrast */
+            background-color: #050505;
             overflow-x: hidden;
         }
 
-        /* The Live Background Canvas - Made Brighter */
+        /* Canvas Background */
         #canvas-container {
             position: fixed;
             top: 0;
@@ -50,39 +51,45 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 1; /* Full visibility */
+            opacity: 1;
             pointer-events: none;
         }
 
-        /* Premium Card Styling - Clean Glass */
+        /* Glassmorphism & Card Styles */
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
         .premium-card {
-            background: rgba(20, 20, 20, 0.7);
+            background: rgba(20, 20, 20, 0.6);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
             overflow: hidden;
             transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .premium-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
         }
 
         /* Mouse Spotlight Effect */
         .premium-card::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             border-radius: inherit;
             padding: 1px;
             background: radial-gradient(
                 600px circle at var(--mouse-x) var(--mouse-y), 
-                rgba(255, 255, 255, 0.6), 
+                rgba(255, 255, 255, 0.4), 
                 transparent 40%
             );
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) content-box, 
-                linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             opacity: 0;
@@ -90,20 +97,16 @@
             pointer-events: none;
         }
 
-        .premium-card:hover::before {
-            opacity: 1;
-        }
+        .premium-card:hover::before { opacity: 1; }
         
         /* Inner Glow */
         .card-glow {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
             background: radial-gradient(
                 500px circle at var(--mouse-x) var(--mouse-y), 
-                rgba(99, 102, 241, 0.15), 
+                rgba(99, 102, 241, 0.1), 
                 transparent 40%
             );
             opacity: 0;
@@ -112,20 +115,23 @@
             z-index: 0;
         }
 
-        .premium-card:hover .card-glow {
-            opacity: 1;
-        }
+        .premium-card:hover .card-glow { opacity: 1; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #404040; }
 
-        .glass-nav {
-            background: rgba(5, 5, 5, 0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .brand-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         }
     </style>
 </head>
@@ -137,59 +143,110 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-4">
-                    <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center">
+                    <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                          <i class="ph-fill ph-graduation-cap text-black text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-display font-bold text-white tracking-tight">Bennett University Resource Hub | Skills Seekers</h1>
-                        
+                        <h1 class="text-lg font-display font-bold text-white tracking-tight">BU Resource Hub</h1>
+                        <p class="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Powered by Skills Seekers</p>
                     </div>
                 </div>
-                <div class="hidden md:block">
-                    <div class="flex items-center space-x-1">
-                        <a href="#sem1" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 1</a>
-                        <a href="#sem2" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 2</a>
-                        <a href="#sem3" class="px-5 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 3</a>
-                        <a href="#prep" class="px-5 py-2 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 transition-all">Prep Guide</a>
+                <div class="hidden lg:block">
+                    <div class="flex items-center space-x-2">
+                        <a href="#sem1" class="px-4 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 1</a>
+                        <a href="#sem2" class="px-4 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 2</a>
+                        <a href="#sem3" class="px-4 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Sem 3</a>
+                        <a href="#prep" class="px-4 py-2 rounded-full text-sm font-medium hover:text-white transition-all text-slate-400">Prep Guide</a>
+                        <div class="h-4 w-px bg-white/10 mx-2"></div>
+                        <a href="https://www.skillsseekers.com" target="_blank" class="px-5 py-2 rounded-full text-sm font-bold bg-white text-black hover:bg-indigo-50 hover:scale-105 transition-all flex items-center gap-2">
+                            <span>Visit Skills Seekers</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="relative pt-48 pb-24 overflow-hidden">
-        <div class="relative max-w-4xl mx-auto px-4 text-center z-10 hero-content">
+    <div class="relative pt-48 pb-20 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] -z-10"></div>
+        
+        <div class="relative max-w-5xl mx-auto px-4 text-center z-10 hero-content">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-medium mb-6 backdrop-blur-md">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                Updated for 2025 Sessions
+            </div>
             
-            <h1 class="text-4xl sm:text-6xl font-display font-bold text-white tracking-tight mb-6 leading-tight">
-                The Hub of all PYQs and <br> Resources for Students.
+            <h1 class="text-5xl md:text-7xl font-display font-bold text-white tracking-tight mb-6 leading-tight">
+                Master Your Exams with <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Premium Resources.</span>
             </h1>
             
-            <p class="text-base text-slate-400 max-w-xl mx-auto mb-10 font-light">
-                A simple, curated archive for Bennett University by Skills Seekers.
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                A curated archive of PYQs, lecture notes, and crash courses for Bennett University students. <br>
+                <span class="text-indigo-400 font-medium">Proudly crafted by Skills Seekers.</span>
             </p>
             
-            <div class="max-w-lg mx-auto relative group">
-                <div class="relative bg-zinc-900/80 border border-zinc-700 rounded-full flex items-center hover:border-indigo-500 transition-colors duration-300">
-                    <div class="pl-6 text-slate-400">
-                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                <div class="w-full sm:w-96 relative group">
+                    <div class="relative bg-zinc-900/80 border border-zinc-700 rounded-full flex items-center hover:border-indigo-500 transition-colors duration-300 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/50 shadow-lg">
+                        <div class="pl-6 text-slate-400">
+                            <i class="ph-bold ph-magnifying-glass text-lg"></i>
+                        </div>
+                        <input type="text" id="searchInput" onkeyup="filterSubjects()" 
+                            class="w-full bg-transparent border-0 py-4 px-4 text-white placeholder-zinc-500 focus:ring-0 text-base font-light outline-none" 
+                            placeholder="Find subject (e.g., Calculus)...">
                     </div>
-                    <input type="text" id="searchInput" onkeyup="filterSubjects()" 
-                        class="w-full bg-transparent border-0 py-4 px-4 text-white placeholder-zinc-500 focus:ring-0 text-base font-light" 
-                        placeholder="Search for subjects or courses...">
                 </div>
+                <a href="https://www.skillsseekers.com" target="_blank" class="px-8 py-4 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2 group">
+                    Explore Skills Seekers
+                    <i class="ph-bold ph-arrow-up-right group-hover:translate-x-1 transition-transform"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 space-y-24">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24 fade-in-section">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="premium-card p-6 rounded-2xl flex flex-col items-center text-center">
+                <div class="card-glow"></div>
+                <div class="h-12 w-12 bg-zinc-800 rounded-xl flex items-center justify-center text-indigo-400 mb-4 text-2xl relative z-10">
+                    <i class="ph-fill ph-check-circle"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2 relative z-10">Curated & Verified</h3>
+                <p class="text-slate-400 text-sm relative z-10">No more random drives. All resources are verified by seniors and toppers.</p>
+            </div>
+            <div class="premium-card p-6 rounded-2xl flex flex-col items-center text-center">
+                <div class="card-glow"></div>
+                <div class="h-12 w-12 bg-zinc-800 rounded-xl flex items-center justify-center text-purple-400 mb-4 text-2xl relative z-10">
+                    <i class="ph-fill ph-lightning"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2 relative z-10">Exam Focused</h3>
+                <p class="text-slate-400 text-sm relative z-10">Tailored specifically for Bennett University curriculum and exam patterns.</p>
+            </div>
+            <div class="premium-card p-6 rounded-2xl flex flex-col items-center text-center">
+                <div class="card-glow"></div>
+                <div class="h-12 w-12 bg-zinc-800 rounded-xl flex items-center justify-center text-pink-400 mb-4 text-2xl relative z-10">
+                    <i class="ph-fill ph-users"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2 relative z-10">Community Driven</h3>
+                <p class="text-slate-400 text-sm relative z-10">Built by students, for students. Powered by the Skills Seekers ecosystem.</p>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-32">
 
         <section id="sem1" class="semester-section">
-            <div class="mb-8">
+            <div class="mb-10 border-l-4 border-blue-500 pl-4">
                 <h2 class="text-3xl font-display font-bold text-white">Semester 01</h2>
+                <p class="text-slate-500 mt-1">Foundational Engineering Courses</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
                 <div class="premium-card rounded-2xl p-1 subject-card group">
                     <div class="card-glow"></div>
                     <div class="relative z-10 bg-black/40 p-6 h-full rounded-xl flex flex-col">
@@ -197,6 +254,7 @@
                             <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
                                 <i class="ph-fill ph-function text-xl"></i>
                             </div>
+                            <span class="text-xs font-mono text-zinc-600">4 Credits</span>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Engineering Calculus</h3>
                         <p class="text-sm text-slate-400 mb-8 flex-grow">Limits, derivatives, integrals, and their applications in engineering.</p>
@@ -295,8 +353,9 @@
         </section>
 
         <section id="sem2" class="semester-section">
-             <div class="mb-8">
+             <div class="mb-10 border-l-4 border-purple-500 pl-4">
                 <h2 class="text-3xl font-display font-bold text-white">Semester 02</h2>
+                <p class="text-slate-500 mt-1">Advanced Mathematics & Core CS</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -416,8 +475,9 @@
         </section>
 
         <section id="sem3" class="semester-section">
-             <div class="mb-8">
+             <div class="mb-10 border-l-4 border-rose-500 pl-4">
                 <h2 class="text-3xl font-display font-bold text-white">Semester 03</h2>
+                <p class="text-slate-500 mt-1">Specialization & Data Structures</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -434,7 +494,7 @@
                         <p class="text-sm text-slate-400 mb-8 flex-grow">Information Management System.</p>
                         <div class="space-y-2 mt-auto">
 
-                                                         <a href="https://drive.google.com/file/d/1FwAqbJQHQqxKSe_ECr22tGqrdbnml7ZH/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                                     <a href="https://drive.google.com/file/d/1FwAqbJQHQqxKSe_ECr22tGqrdbnml7ZH/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
                                 <span class="text-xs font-medium text-slate-300">Endsem 2023</span>
                                 <i class="ph-bold ph-download-simple text-rose-400"></i>
                             </a>
@@ -461,7 +521,7 @@
                         <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">Data Structures (C++)</h3>
                         <p class="text-sm text-slate-400 mb-8 flex-grow">Arrays, Linked Lists, Trees, Graphs, and efficient algorithms.</p>
                         <div class="space-y-2 mt-auto">
-                                                         <a href="https://drive.google.com/file/d/1uCOQrQEfoHrUS3B5taPsQ4Tw_noEEx7t/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                                     <a href="https://drive.google.com/file/d/1uCOQrQEfoHrUS3B5taPsQ4Tw_noEEx7t/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
                                 <span class="text-xs font-medium text-slate-300">Endsem 2023</span>
                                 <i class="ph-bold ph-download-simple text-cyan-400"></i>
                             </a>
@@ -488,7 +548,7 @@
                         <h3 class="text-xl font-bold text-white mb-2 subject-name font-display">SML (Machine Learning)</h3>
                         <p class="text-sm text-slate-400 mb-8 flex-grow">Statistical Machine Learning concepts and models.</p>
                         <div class="space-y-2 mt-auto">
-                                                         <a href="https://drive.google.com/file/d/10cGKB3K0xUcnFiRBHzD2I2f7dkl8yMJV/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
+                                                     <a href="https://drive.google.com/file/d/10cGKB3K0xUcnFiRBHzD2I2f7dkl8yMJV/view?usp=sharing" class="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg transition-all hover:bg-zinc-800">
                                 <span class="text-xs font-medium text-slate-300">Midsem 2023</span>
                                 <i class="ph-bold ph-download-simple text-violet-400"></i>
                             </a>
@@ -531,12 +591,12 @@
         </section>
 
         <section id="prep" class="semester-section">
-            <div class="mb-8">
-                <div class="flex items-end gap-4 mb-2">
-                    <h2 class="text-3xl font-display font-bold text-white">Skills Seekers : Preparation Guide & Crash Courses</h2>
-                    <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-medium uppercase tracking-wider mb-1">Most Recommended</span>
+            <div class="mb-10">
+                <div class="flex flex-col md:flex-row md:items-end gap-4 mb-2">
+                    <h2 class="text-3xl font-display font-bold text-white">Skills Seekers : Preparation Guide</h2>
+                    <span class="w-fit px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-medium uppercase tracking-wider mb-1">Most Recommended</span>
                 </div>
-                <p class="text-slate-400 max-w-2xl font-light">SKILLS SEEKERS Crash Courses, playlists to fast-track your exam preparation.</p>
+                <p class="text-slate-400 max-w-2xl font-light">Exclusive crash courses, playlists, and solved papers to fast-track your exam preparation.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -720,12 +780,12 @@
                     </div>
                 </div>
 
-                <div class="premium-card rounded-2xl p-1 group border-dashed border-zinc-800 opacity-60">
+                <div class="premium-card rounded-2xl p-1 group border-dashed border-zinc-800 opacity-60 hover:opacity-100 transition-opacity">
                     <div class="relative z-10 bg-transparent p-6 h-full rounded-xl flex flex-col items-center justify-center text-center">
-                        <div class="h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500 mb-4">
+                        <div class="h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500 mb-4 group-hover:text-white transition-colors">
                             <i class="ph-fill ph-dots-three text-2xl"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-zinc-400 mb-2 font-display">More Subjects</h3>
+                        <h3 class="text-lg font-bold text-zinc-400 mb-2 font-display group-hover:text-white">More Subjects</h3>
                         <p class="text-sm text-zinc-600">Preparation guides for other subjects coming soon.</p>
                     </div>
                 </div>
@@ -733,27 +793,125 @@
             </div>
         </section>
 
+        <section class="semester-section py-12 relative">
+            <div class="absolute inset-0 bg-indigo-900/5 blur-[100px] z-[-1]"></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+
+                <div class="stat-item">
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display"><span class="counter" data-target="20">0</span>+</h3>
+                    <p class="text-sm text-indigo-300 uppercase tracking-widest">Courses</p>
+                </div>
+                <div class="stat-item">
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display"><span class="counter" data-target="5000">0</span>+</h3>
+                    <p class="text-sm text-indigo-300 uppercase tracking-widest">Students Enrolled</p>
+                </div>
+                <div class="stat-item">
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display"><span class="counter" data-target="100">0</span>%</h3>
+                    <p class="text-sm text-indigo-300 uppercase tracking-widest">Best Resources</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="semester-section rounded-3xl overflow-hidden relative border border-zinc-800">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-black z-0"></div>
+            <div class="relative z-10 px-6 py-16 md:px-12 flex flex-col md:flex-row items-center justify-between gap-12">
+<div class="max-w-2xl">
+    <div class="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-bold text-white mb-4">
+        THE CREATORS
+    </div>
+
+    <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-6">
+        Powered by <span class="text-indigo-400">Skills Seekers</span>
+    </h2>
+
+    <p class="text-slate-300 text-lg leading-relaxed mb-8">
+        We are an EdTech initiative dedicated to revolutionizing how students learn. This Resource Hub is just one part of our mission to provide accessible, high-quality educational content for Bennett University students.
+    </p>
+
+    <div class="flex flex-wrap gap-4">
+        <a href="https://www.skillsseekers.com" target="_blank"
+           class="px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 transition-colors">
+            Visit Official Website
+        </a>
+
+        <a href="https://www.skillsseekers.com/s/store" target="_blank"
+           class="px-6 py-3 bg-transparent border border-white/20 text-white font-medium rounded-lg hover:bg-white/5 transition-colors">
+            Browse All Courses
+        </a>
+
+        <!-- NEW: YouTube Button -->
+        <a href="https://www.youtube.com/@SkillsSeekers-PrathamKocher" target="_blank"
+           class="px-6 py-3 bg-transparent border border-white/20 text-white font-medium rounded-lg hover:bg-white/5 transition-colors">
+            Visit YouTube Channel
+        </a>
+    </div>
+</div>
+
+<div class="relative">
+    <div class="h-40 w-40 md:h-56 md:w-56 bg-white rounded-xl overflow-hidden shadow-[0_0_50px_rgba(99,102,241,0.4)] flex items-center justify-center">
+        <!-- Paste your Skills Seekers logo URL here -->
+        <img 
+            src="skills.png" 
+            alt="Skills Seekers Logo"
+            class="h-full w-full object-contain p-4"
+        />
+    </div>
+</div>
+
+            </div>
+        </section>
+
     </main>
 
-    <footer class="border-t border-zinc-800 bg-black py-12">
+    <footer class="border-t border-zinc-800 bg-black pt-20 pb-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="text-center md:text-left">
-                    <h2 class="text-xl font-display font-bold text-white">BU Resource Hub</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div>
+                    <h2 class="text-2xl font-display font-bold text-white mb-4">BU Resource Hub</h2>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        A student-first initiative to make exam preparation seamless and effective.
+                    </p>
                 </div>
                 
-                <div class="flex space-x-6">
-                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">
-                        <i class="ph-fill ph-github-logo text-2xl"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/vanshmalhotra1301/?lipi=urn%3Ali%3Apage%3Ad_flagship3_feed%3BpS5lzLNbRYq9Wqrb0alMCg%3D%3D" class="text-zinc-500 hover:text-white transition-colors">
-                        <i class="ph-fill ph-linkedin-logo text-2xl"></i>
-                    </a>
+                <div>
+                    <h3 class="text-white font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm text-slate-500">
+                        <li><a href="#sem1" class="hover:text-indigo-400 transition-colors">First Semester</a></li>
+                        <li><a href="#sem2" class="hover:text-indigo-400 transition-colors">Second Semester</a></li>
+                        <li><a href="#sem3" class="hover:text-indigo-400 transition-colors">Third Semester</a></li>
+                        <li><a href="#prep" class="hover:text-indigo-400 transition-colors">Prep Guide</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-4">Skills Seekers</h3>
+                    <ul class="space-y-2 text-sm text-slate-500">
+                        <li><a href="https://www.skillsseekers.com" class="hover:text-indigo-400 transition-colors">Main Website</a></li>
+                        <li><a href="https://www.skillsseekers.com/s/store" class="hover:text-indigo-400 transition-colors">Premium Courses</a></li>
+                        <li><a href="" class="hover:text-indigo-400 transition-colors">Community</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://www.instagram.com/pratham_kocher/?next=%2F" class="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 hover:bg-indigo-600 hover:text-white transition-all">
+                            <i class="ph-fill ph-instagram-logo text-xl"></i>
+                        </a>
+                        <a href="http://linkedin.com/in/pratham-kocher-7a91bb25a" class="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 hover:bg-blue-600 hover:text-white transition-all">
+                            <i class="ph-fill ph-linkedin-logo text-xl"></i>
+                        </a>
+
+                    </div>
                 </div>
             </div>
             
-            <div class="mt-8 pt-8 border-t border-zinc-900 text-center text-sm text-zinc-600">
-                <p>&copy; 2025 Bennett University Resource Hub. Designed by Skills Seekers.</p>
+            <div class="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-zinc-600 text-center md:text-left">&copy; 2025 Bennett University Resource Hub. Built with ❤️ by Skills Seekers.</p>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-zinc-600 uppercase tracking-widest">Powered By</span>
+                    <span class="text-sm font-bold text-white">Skills Seekers</span>
+                </div>
             </div>
         </div>
     </footer>
@@ -775,7 +933,7 @@
             }
         }
 
-        // 2. CARD SPOTLIGHT EFFECT (Mouse Tracking)
+        // 2. CARD SPOTLIGHT EFFECT
         document.querySelectorAll('.premium-card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
@@ -791,29 +949,58 @@
         
         // Hero Fade In
         gsap.from(".hero-content > *", {
-            y: 30,
+            y: 50,
             opacity: 0,
-            duration: 1,
-            stagger: 0.1,
-            ease: "power2.out"
+            duration: 1.2,
+            stagger: 0.15,
+            ease: "power3.out"
         });
 
-        // Semester Sections Slide Up
+        // Fade In Sections
+        const fadeElements = document.querySelectorAll('.fade-in-section');
+        fadeElements.forEach(el => {
+            gsap.from(el, {
+                scrollTrigger: { trigger: el, start: "top 85%" },
+                y: 30, opacity: 0, duration: 1
+            });
+        });
+
+        // Semester Cards Stagger
         gsap.utils.toArray('.semester-section').forEach((section) => {
-            gsap.from(section, {
+            gsap.from(section.querySelectorAll('.premium-card'), {
                 scrollTrigger: {
                     trigger: section,
-                    start: "top 90%",
-                    toggleActions: "play none none reverse"
+                    start: "top 85%",
                 },
-                y: 40,
+                y: 50,
                 opacity: 0,
                 duration: 0.8,
+                stagger: 0.1,
                 ease: "power2.out"
             });
         });
 
-        // 4. LIVE CANVAS BACKGROUND (Brighter & More Visible)
+        // Stats Counter Animation
+        const stats = document.querySelectorAll('.counter');
+        stats.forEach(stat => {
+            let target = +stat.getAttribute('data-target');
+            gsap.to(stat, {
+                innerText: target,
+                duration: 2,
+                snap: { innerText: 1 },
+                scrollTrigger: {
+                    trigger: stat,
+                    start: "top 90%",
+                    once: true
+                },
+                ease: "power1.out",
+                onUpdate: function() {
+                    stat.innerHTML = Math.ceil(this.targets()[0].innerText);
+                }
+            });
+        });
+
+        // 4. CANVAS BACKGROUND
         const canvas = document.getElementById('canvas-container');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -830,9 +1017,9 @@
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1; // Slightly larger particles
+                this.vx = (Math.random() - 0.5) * 0.3; // Slower, calmer movement
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.size = Math.random() * 2 + 0.5;
             }
             update() {
                 this.x += this.vx;
@@ -841,8 +1028,7 @@
                 if (this.y < 0 || this.y > height) this.vy *= -1;
             }
             draw() {
-                // Brighter Particle Color (Cyan/Indigo mix)
-                ctx.fillStyle = 'rgba(129, 140, 248, 0.9)'; 
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.5)'; // Indigo tint
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -851,7 +1037,7 @@
 
         function initParticles() {
             particles = [];
-            for (let i = 0; i < 70; i++) particles.push(new Particle());
+            for (let i = 0; i < 60; i++) particles.push(new Particle());
         }
 
         function animate() {
@@ -859,15 +1045,13 @@
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
                 particles[i].draw();
-                // Connect particles
                 for (let j = i; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 160) {
-                        // Significantly brighter connecting lines
-                        ctx.strokeStyle = `rgba(129, 140, 248, ${0.3 - distance/1500})`;
-                        ctx.lineWidth = 1;
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(99, 102, 241, ${0.15 - distance/1000})`;
+                        ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
